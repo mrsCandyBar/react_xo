@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import Board from './components/board.jsx';
+import Scoreboard from './components/scoreboard.jsx';
 
 class Game extends React.Component {
 
@@ -15,8 +16,26 @@ class Game extends React.Component {
                 })
             }],
             stepNumber: 0,
-            xIsNext: true
+            xIsNext: true,
+            game: {
+                users: [{
+                    name: 'Player 1',
+                    score: 0
+                }, {
+                    name: 'Player 2',
+                    score: 0
+                }],
+            }
         };
+    }
+
+    renamePlayer(update) {
+        let updateUsers = this.state.game;
+        updateUsers.users[update.index].name = update.name;
+
+        this.setState({
+            game: updateUsers,
+        });
     }
 
     handleClick(i) {
@@ -31,7 +50,6 @@ class Game extends React.Component {
             player: this.state.xIsNext ? 'X' : 'O',
             winCheck: false
         }
-
 
         this.setState({
             history: history.concat([{
@@ -53,7 +71,7 @@ class Game extends React.Component {
                 })
             }],
             stepNumber: 0,
-            xIsNext: this.state.xIsNext ? true : false
+            xIsNext: this.state.xIsNext ? true : false,
         });
     }
 
@@ -81,29 +99,37 @@ class Game extends React.Component {
 
         let status;
         if (winner) {
-            status = 'Winner: ' + (this.state.xIsNext ? 'O' : 'X');
+            let winningUser = this.state.xIsNext ? 1 : 0;
+            status = 'Winner: ' + this.state.game.users[winningUser].name;
+            this.state.game.users[winningUser].score = parseInt(this.state.game.users[winningUser].score) + 1;
+
         } else {
-            status = 'Next player: ' + (this.state.xIsNext ? 'X' : 'O');
+            let nextUser = this.state.xIsNext ? 0 : 1;
+            status = 'Next player: ' + this.state.game.users[nextUser].name;
         }
 
         return (
+
             <div className="game">
+
+                <Scoreboard game={this.state.game} onClick={(i) => this.renamePlayer(i)} />
+
                 <div className="game-board">
                     <Board
                         squares={current.squares}
-                        winningSquares={winner}
                         onClick={(i) => this.handleClick(i)}
                     />
                 </div>
+
                 <div className="game-info">
                     <div>{ status }</div>
                     <ol>{ moves }</ol>
                 </div>
 
                 <button
-                    className={ winner ? '' : 'hidden'}
+                    className={ winner || this.state.history.length > 9 ? '' : 'hidden'}
                     onClick={() => this.restartGame() }>
-                    Restart
+                    New Game
                 </button>
             </div>
         );
