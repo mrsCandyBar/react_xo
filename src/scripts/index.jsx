@@ -2,6 +2,17 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import Board from './components/board.jsx';
 import Scoreboard from './components/scoreboard.jsx';
+import SVG from '../helpers/svg.jsx';
+import FinishMove from './components/finishMove.jsx';
+
+
+function ReturnPlayer(props) {
+    return (
+        <svg viewBox="0 0 337 321">
+            <use xlinkHref={props.index == 0 ? '#svg_x' : '#svg_kiss'} className={props.index == 0 ? 'ico-blue' : 'ico-yellow'}></use>
+        </svg>
+    )
+}
 
 class Game extends React.Component {
 
@@ -11,7 +22,6 @@ class Game extends React.Component {
             history: [{
                 squares: Array(9).fill({
                     player: null,
-                    winCheck: false,
                     move: null
                 })
             }],
@@ -25,40 +35,54 @@ class Game extends React.Component {
                     name: 'Player 2',
                     score: 0
                 }],
-            }
+            },
+            winStrike: ''
         };
-    }
-
-    renamePlayer(update) {
-        let updateUsers = this.state.game;
-        updateUsers.users[update.index].name = update.name;
-
-        this.setState({
-            game: updateUsers,
-        });
     }
 
     handleClick(i) {
         const history = this.state.history.slice(0, this.state.stepNumber + 1);
         const current = history[history.length - 1];
         const squares = current.squares.slice();
+        if (!squares[i].player) {
+            squares[i] = {
+                player: this.state.xIsNext ? 'X' : 'O'
+            }
 
-        if (calculateWinner(squares) || squares[i].player) {
-            return;
-        }
-        squares[i] = {
-            player: this.state.xIsNext ? 'X' : 'O',
-            winCheck: false
-        }
+            let isWinningMove = calculateWinner(squares);
+            isWinningMove = isWinningMove ?  _determineWinningLine(isWinningMove) : '';
+            this.setState({
+                history: history.concat([{
+                    squares: squares,
+                    move: i
+                }]),
+                stepNumber: history.length,
+                xIsNext: !this.state.xIsNext,
+                winStrike: isWinningMove ? isWinningMove : ''
+            });
 
-        this.setState({
-            history: history.concat([{
-                squares: squares,
-                move: i
-            }]),
-            stepNumber: history.length,
-            xIsNext: !this.state.xIsNext
-        });
+            if (isWinningMove) {
+                let updateUserData = this.state.game.users;
+                let user = this.state.xIsNext ? 0 : 1;
+                updateUserData[user].score = updateUserData[user].score + 1;
+
+                setTimeout(() => {
+                    this.restartGame();
+                    this.setState({
+                        game: {
+                            users: updateUserData
+                        },
+                        winStrike: ''
+                    });
+                }, 1000)
+
+            } else if (history.length === 9) {
+                setTimeout(() => {
+                    this.restartGame();
+                }, 700);
+            }
+
+        }
     }
 
     restartGame() {
@@ -66,7 +90,6 @@ class Game extends React.Component {
             history: [{
                 squares: Array(9).fill({
                     player: null,
-                    winCheck: false,
                     move: null
                 })
             }],
@@ -85,52 +108,32 @@ class Game extends React.Component {
     render() {
         const history = this.state.history;
         const current = history[this.state.stepNumber];
-        const winner = calculateWinner(current.squares);
-        const moves = history.map((step, move) => {
-            const desc = move ?
-                'Move #' + step.move : 'Game start';
-
-            return (
-              <li key={move} className={this.state.stepNumber === move  ? 'bold' : ''} >
-                  <a href="#" onClick={() => this.jumpTo(move)}>{desc}</a>
-              </li>
-            );
-        })
+        const winStreak = this.state.winStrike;
 
         let status;
-        if (winner) {
+        if (winStreak) {
             let winningUser = this.state.xIsNext ? 1 : 0;
             status = 'Winner: ' + this.state.game.users[winningUser].name;
-            this.state.game.users[winningUser].score = parseInt(this.state.game.users[winningUser].score) + 1;
-
-        } else {
-            let nextUser = this.state.xIsNext ? 0 : 1;
-            status = 'Next player: ' + this.state.game.users[nextUser].name;
         }
 
         return (
-
             <div className="game">
-
-                <Scoreboard game={this.state.game} onClick={(i) => this.renamePlayer(i)} />
-
-                <div className="game-board">
-                    <Board
-                        squares={current.squares}
-                        onClick={(i) => this.handleClick(i)}
-                    />
-                </div>
-
+                <SVG />
                 <div className="game-info">
-                    <div>{ status }</div>
-                    <ol>{ moves }</ol>
+                    <div id="status" className={ this.state.xIsNext ? 'ico-blue' : 'ico-yellow'}>
+                        &nbsp;{ !winStreak ? 'next move ' : '' }&nbsp;
+                        <player><ReturnPlayer index={ this.state.xIsNext ? 0 : 1} /></player>
+                        <h4>&nbsp;{ winStreak ? 'wins!!!' : '' }&nbsp;</h4>
+                    </div>
                 </div>
 
-                <button
-                    className={ winner || this.state.history.length > 9 ? '' : 'hidden'}
-                    onClick={() => this.restartGame() }>
-                    New Game
-                </button>
+                <FinishMove direction={ winStreak } winner={ !this.state.xIsNext } />
+                <Board
+                    squares={current.squares}
+                    onClick={(i) => this.handleClick(i)}/>
+
+                <Scoreboard game={this.state.game} />
+
             </div>
         );
     }
@@ -150,16 +153,33 @@ function calculateWinner(squares) {
 
     for (let i = 0; i < lines.length; i++) {
         const[a, b, c] = lines[i];
-
         if (squares[a].player != null &&
             squares[a].player === squares[b].player &&
             squares[a].player === squares[c].player) {
-
-            squares[a].winCheck = true;
-            squares[b].winCheck = true;
-            squares[c].winCheck = true;
             return lines[i];
         }
+    }
+}
+
+function _determineWinningLine(winner) {
+    winner.forEach((number, index) => {
+        winner[index] = parseInt(number) + 1;
+    });
+
+    if ((winner[1] - winner[0]) === 1) {
+        if (winner[0] === 1) {          return 'horizontal horizontal__top';}
+        else if(winner[0] === 7) {      return 'horizontal horizontal__bottom';}
+        else {                          return 'horizontal';}
+
+    } else if ((winner[1] - winner[0]) === 4 || (winner[1] - winner[0]) === 2) {
+        if (winner[0] === 1) {          return 'diagonal diagonal__startLeft';}
+        else {                          return 'diagonal diagonal__startRight';}
+
+    } else if ((winner[1] - winner[0]) === 3) {
+        if (winner[0] === 1) {          return 'vertical vertical__left';}
+        else if (winner[0] === 3) {     return 'vertical vertical__right';}
+        else {                          return 'vertical';}
+
     }
 }
 
@@ -168,5 +188,10 @@ function calculateWinner(squares) {
 var appContainer = document.createElement('div');
 appContainer.id = "appHolder";
 document.body.appendChild(appContainer);
+
+var addFont = document.createElement('link');
+addFont.href = 'https://fonts.googleapis.com/css?family=Architects+Daughter';
+addFont.rel = 'stylesheet';
+document.head.appendChild(addFont);
 
 ReactDOM.render(<Game />, document.getElementById('appHolder'));

@@ -1,9 +1,20 @@
 import React from 'react';
 
-function Square(props) {
+function ReturnPlayer(props) {
     return (
-        <button className={props.value.winCheck ? 'square highlight' : 'square'} onClick={props.onClick}>
-            {props.value.player}
+        <svg viewBox="0 0 337 321">
+            <use xlinkHref={props.index == 0 ? '#svg_x' : '#svg_kiss'} className={props.index == 0 ? 'ico-blue' : 'ico-yellow'}></use>
+        </svg>
+    )
+}
+
+function Square(props) {
+    let createIcon = <ReturnPlayer index={ props.value.player == 'X' ? 0 : 1 } />;
+
+    return (
+        <button className='square' onClick={props.onClick}>
+            <move>{ props.value.player ? createIcon : '' }</move>
+
         </button>
     );
 }
@@ -34,7 +45,7 @@ export default class Board extends React.Component {
         });
 
         return (
-            <div>{ blockList }</div>
+            <div className="game-board">{ blockList }</div>
         );
     }
 

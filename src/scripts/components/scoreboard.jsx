@@ -20,20 +20,18 @@ export default class Scoreboard extends React.Component {
         let userList = this.state.users.map(function(user, index) {
             return (
                 <li key={index}>
-                    {user.name} ({user.score})
-                    <input defaultValue={user.name} id={'player' + index} type="text" />
-                    <button onClick={() => $this.props.onClick({name: document.getElementById('player' + index).value, index: index})}>Change</button>
+                    <player>
+                        <svg viewBox="0 0 337 321">
+                            <use xlinkHref={ index === 0 ? '#svg_x' : '#svg_kiss'} className={ index === 0 ? 'ico-blue' : 'ico-yellow'}></use>
+                        </svg>
+                    </player>
+                    <score className={ index === 0 ? 'ico-blue' : 'ico-yellow'}>{user.score}</score>
                 </li>
             );
         });
 
         return (
-            <div>
-                <h5>Home Screen</h5>
-                <ul>{ userList }</ul>
-
-                <button onClick={() => this.props.Rename() }></button>
-            </div>
+            <ul id="score">{ userList }</ul>
 
         );
     }
