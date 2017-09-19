@@ -38,7 +38,6 @@ class Game extends React.Component {
             },
             winStrike: '',
             opponent: 'O',
-            strategy: 'offense'
         };
     }
 
@@ -132,7 +131,6 @@ class Game extends React.Component {
     // Has game been won check
     possibleMoves(squares) {
         squares = squares ? squares : [0,1,2,3,4,5,6,7,8];
-        let playStyle = this.state.strategy;
         const lines = [
             [0, 1, 2],
             [3, 4, 5],
@@ -144,23 +142,25 @@ class Game extends React.Component {
             [2, 4, 6]
         ];
 
-        if (playStyle == 'random') {
-            return _randomize(squares); }
-
-        let user = playStyle == 'defense' ? this.returnPlayer('letter', 'next') : this.returnPlayer();
+        let user = this.returnPlayer();
         let move = _singleOut(squares, user, lines);
+        if (!move) { move = _singleOut(squares, (user == 'X' ? 'O' : 'X'), lines) }
         if (!move) { move = _securePosition(squares, user, lines) }
         return !move ? _randomize(squares) : move;
 
         function _singleOut(squares, user, lines) {
             for (let i = 0; i < lines.length; i++) {
                 const [a, b, c] = lines[i];
-                if (((squares[a].player == user) && (squares[b].player == user) && (!squares[c].player)) ||
-                    ((squares[b].player == user) && (squares[c].player == user) && (!squares[a].player)) ||
-                    ((squares[a].player == user) && (squares[c].player == user) && (!squares[b].player))) {
-                    if (!squares[a].player)         { return a }
-                    else if (!squares[b].player)    { return b }
-                    else if (!squares[c].player)    { return c }
+                if ((squares[a].player && squares[b].player && !squares[c].player) ||
+                    (squares[b].player && squares[c].player && !squares[a].player) ||
+                    (squares[a].player && squares[c].player && !squares[b].player)) {
+                    if (((squares[a].player == user) && (squares[b].player == user)) ||
+                        ((squares[b].player == user) && (squares[c].player == user)) ||
+                        ((squares[a].player == user) && (squares[c].player == user))) {
+                        if (!squares[a].player)         { return a }
+                        else if (!squares[b].player)    { return b }
+                        else if (!squares[c].player)    { return c }
+                    }
                 }
             }
             return false;
