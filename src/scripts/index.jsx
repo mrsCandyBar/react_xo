@@ -37,7 +37,7 @@ class Game extends React.Component {
                 }],
             },
             winStrike: '',
-            opponent: 'X'
+            opponent: 'O'
         };
     }
 
@@ -91,11 +91,14 @@ class Game extends React.Component {
                 setTimeout(() => {
                     this.restartGame();
                 }, 1000);
+
             } else {
                 setTimeout(() => {
-                    if (this.isOpponentNext()) {
-                        this.automateClick(squares); }
-                }, 1000);
+                    let lastMove = this.state.history[this.state.history.length - 1].squares;
+                    if (this.isOpponentNext() && (squares === lastMove)) {
+                        this.automateClick(squares);
+                    }
+                }, 500);
             }
 
         }
@@ -174,7 +177,7 @@ class Game extends React.Component {
                 </div>
 
                 <FinishMove direction={ winningSlash } winner={ user } />
-                <Board squares={current.squares} onClick={(i) => this.handleClick(i)}/>
+                <Board squares={current.squares} onClick={(i) => this.isOpponentNext() ? '' : this.handleClick(i)}/>
                 <Scoreboard game={this.state.game} />
 
             </div>
