@@ -6,7 +6,7 @@ import SVG from '../helpers/svg.jsx';
 import FinishMove from './components/finishMove.jsx';
 
 
-function ReturnPlayer(props) {
+function User(props) {
     return (
         <svg viewBox="0 0 337 321">
             <use xlinkHref={props.index == 0 ? '#svg_x' : '#svg_kiss'} className={props.index == 0 ? 'ico-blue' : 'ico-yellow'}></use>
@@ -26,7 +26,7 @@ class Game extends React.Component {
                 })
             }],
             stepNumber: 0,
-            xIsNext: true,
+            currentPlayer: 'X',
             game: {
                 users: [{
                     name: 'Player 1',
@@ -36,34 +36,45 @@ class Game extends React.Component {
                     score: 0
                 }],
             },
-            winStrike: ''
+            winStrike: '',
+            opponent: 'X'
         };
+    }
+
+    playerSelection(player) {
+        this.setState({
+           opponent: player === 'X' ? 'O' : 'X' });
+
+        if (this.isOpponentNext()) {
+            this.automateClick(); }
     }
 
     handleClick(i) {
         const history = this.state.history.slice(0, this.state.stepNumber + 1);
         const current = history[history.length - 1];
         const squares = current.squares.slice();
+
         if (!squares[i].player) {
             squares[i] = {
-                player: this.state.xIsNext ? 'X' : 'O'
-            }
+                player: this.state.currentPlayer };
 
-            let isWinningMove = calculateWinner(squares);
+            let isWinningMove;
+            isWinningMove = calculateWinner(squares);
             isWinningMove = isWinningMove ?  _determineWinningLine(isWinningMove) : '';
+
             this.setState({
                 history: history.concat([{
                     squares: squares,
                     move: i
                 }]),
                 stepNumber: history.length,
-                xIsNext: !this.state.xIsNext,
+                currentPlayer: this.returnPlayer('', 'next'),
                 winStrike: isWinningMove ? isWinningMove : ''
             });
 
             if (isWinningMove) {
                 let updateUserData = this.state.game.users;
-                let user = this.state.xIsNext ? 0 : 1;
+                let user = this.returnPlayer('number', '', squares[i].player);
                 updateUserData[user].score = updateUserData[user].score + 1;
 
                 setTimeout(() => {
@@ -79,12 +90,55 @@ class Game extends React.Component {
             } else if (history.length === 9) {
                 setTimeout(() => {
                     this.restartGame();
-                }, 700);
+                }, 1000);
+            } else {
+                setTimeout(() => {
+                    if (this.isOpponentNext()) {
+                        this.automateClick(squares); }
+                }, 1000);
             }
 
         }
     }
 
+        isOpponentNext() {
+            return (this.returnPlayer() == this.state.opponent) ? true : false;
+        }
+
+        returnPlayer(type, state, player) {
+            if (!player) {
+                player = this.state.currentPlayer; }
+
+            if (type == 'number') {
+                if (state == 'next') {
+                    return player == 'X' ? '1' : '0' }
+                return player == 'X' ? '0' : '1'
+            }
+
+            if (state == 'next') {
+                return player == 'X' ? 'O' : 'X'; }
+            return player
+        }
+
+
+    automateClick(squares) {
+        squares = squares ? squares : [0,1,2,3,4,5,6,7,8];
+
+        let availableMoves = [];
+        squares.forEach((move, index) => {
+            if (!move.player) {
+                availableMoves[availableMoves.length] = index;
+            }
+        })
+
+        let getRandomOpenSlot = 0;
+        if (availableMoves.length > 1) {
+            getRandomOpenSlot = Math.round(Math.random() * ((availableMoves.length - 1) - 1) + 1);
+        }
+        this.handleClick(availableMoves[getRandomOpenSlot]);
+    }
+
+    // Restart game
     restartGame() {
         this.setState({
             history: [{
@@ -94,44 +148,33 @@ class Game extends React.Component {
                 })
             }],
             stepNumber: 0,
-            xIsNext: this.state.xIsNext ? true : false,
+            currentPlayer: this.returnPlayer('letter', 'next')
         });
-    }
 
-    jumpTo(step) {
-        this.setState({
-            stepNumber: step,
-            xIsNext: (step % 2 === 0) ? true : false
-        });
+        // If last move played was PC check
+        if (this.isOpponentNext()) {
+            this.automateClick();
+        }
     }
 
     render() {
         const history = this.state.history;
         const current = history[this.state.stepNumber];
-        const winStreak = this.state.winStrike;
-
-        let status;
-        if (winStreak) {
-            let winningUser = this.state.xIsNext ? 1 : 0;
-            status = 'Winner: ' + this.state.game.users[winningUser].name;
-        }
+        const winningSlash = this.state.winStrike;
+        let user = winningSlash ? this.returnPlayer('number', 'next') : this.returnPlayer('number');
 
         return (
             <div className="game">
                 <SVG />
                 <div className="game-info">
-                    <div id="status" className={ this.state.xIsNext ? 'ico-blue' : 'ico-yellow'}>
-                        &nbsp;{ !winStreak ? 'next move ' : '' }&nbsp;
-                        <player><ReturnPlayer index={ this.state.xIsNext ? 0 : 1} /></player>
-                        <h4>&nbsp;{ winStreak ? 'wins!!!' : '' }&nbsp;</h4>
+                    <div id="status" className={ user == 0 ? 'ico-blue' : 'ico-yellow'}>
+                        <player><User index={ user } /></player>
+                        <h4>&nbsp;{ winningSlash ? 'wins!!!' : 'next up!' }&nbsp;</h4>
                     </div>
                 </div>
 
-                <FinishMove direction={ winStreak } winner={ !this.state.xIsNext } />
-                <Board
-                    squares={current.squares}
-                    onClick={(i) => this.handleClick(i)}/>
-
+                <FinishMove direction={ winningSlash } winner={ user } />
+                <Board squares={current.squares} onClick={(i) => this.handleClick(i)}/>
                 <Scoreboard game={this.state.game} />
 
             </div>
@@ -139,6 +182,7 @@ class Game extends React.Component {
     }
 }
 
+// Has game been won check
 function calculateWinner(squares) {
     const lines = [
         [0, 1, 2],
@@ -161,6 +205,7 @@ function calculateWinner(squares) {
     }
 }
 
+// which direction was the winning line
 function _determineWinningLine(winner) {
     winner.forEach((number, index) => {
         winner[index] = parseInt(number) + 1;
@@ -182,6 +227,7 @@ function _determineWinningLine(winner) {
 
     }
 }
+
 
 // ========================================
 

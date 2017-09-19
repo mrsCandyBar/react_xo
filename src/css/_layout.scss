@@ -35,9 +35,9 @@ $boardMinWidth: calc((#{$squareMinWidth} * 3) + (1px * 4));
     &.horizontal__bottom  { margin-top: #{$squareWidth} !important; }
     &.diagonal {
       svg {
-        width: 120%;
-        height: 120%;
-        margin: -10%;
+        width: 130%;
+        height: 130%;
+        margin: -15%;
       }
     }
   }
