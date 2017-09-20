@@ -159,3 +159,66 @@ $boardMinWidth: calc((#{$squareMinWidth} * 3) + (1px * 4));
     }
   }
 }
+
+
+// Intro Pages
+$maxDimensionsGraphics: 400px;
+$minDimensionsGraphics: 200px;
+#home {
+  display: block;
+  margin: 0 auto;
+  min-height: 300px;
+
+  .containment {
+    max-width: $maxDimensionsGraphics;
+    max-height: $maxDimensionsGraphics;
+    width: 80vw;
+    height: 80vw;
+    min-height: $minDimensionsGraphics;
+    min-width: $minDimensionsGraphics;
+    display: block;
+    margin: 10vw auto;
+
+    .quadrant {
+      width: 40vw;
+      height: 40vw;
+      max-width: #{$maxDimensionsGraphics / 2};
+      max-height: #{$maxDimensionsGraphics / 2};
+      min-height: #{$minDimensionsGraphics / 2};
+      min-width: #{$minDimensionsGraphics / 2};
+      display: inline-block;
+      text-align: center;
+    }
+  }
+
+  @media screen and (min-aspect-ratio: 300/300) {
+    .containment {
+      width: 80vh;
+      height: 80vh;
+      margin: 10vh auto;
+
+      .quadrant {
+        width: 40vh;
+        height: 40vh;
+      }
+    }
+
+    @media screen and (min-height: 600px) {
+      .containment {
+        margin: calc((100vh - #{$maxDimensionsGraphics}) / 2) auto;
+      }
+    }
+  }
+
+  @media screen and (max-aspect-ratio: 300/300) {
+    .containment {
+      margin: calc((100vh - 80vw) / 2) auto;
+    }
+
+    @media screen and (min-width: 500px) {
+      .containment {
+        margin: calc((100vh - #{$maxDimensionsGraphics}) / 2) auto;
+      }
+    }
+  }
+}
