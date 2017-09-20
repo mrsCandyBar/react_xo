@@ -17,30 +17,40 @@ $boardMinWidth: calc((#{$squareMinWidth} * 3) + (1px * 4));
 }
 
 .board-row {
-   width: $boardWidth;
-   max-width: $boardMaxWidth;
-   min-width: $boardMinWidth;
- }
-  .overlay {
-    width: $boardWidth;
-    height: $boardWidth;
-    max-width: $boardMaxWidth;
-    max-height: $boardMaxWidth;
-    min-width: $boardMinWidth;
-    min-height: $boardMinWidth;
+  width: $boardWidth;
+  max-width: $boardMaxWidth;
+  min-width: $boardMinWidth;
+}
 
-    &.vertical__left svg { width: #{$squareWidth}; }
-    &.vertical__right svg { width: #{$squareWidth}; margin-right: calc(#{$squareWidth} * 2) !important;}
-    &.horizontal__top     { margin-top: -#{$squareWidth} !important; }
-    &.horizontal__bottom  { margin-top: #{$squareWidth} !important; }
-    &.diagonal {
-      svg {
-        width: 130%;
-        height: 130%;
-        margin: -15%;
-      }
+.overlay {
+  width: $boardWidth;
+  height: $boardWidth;
+  max-width: $boardMaxWidth;
+  max-height: $boardMaxWidth;
+  min-width: $boardMinWidth;
+  min-height: $boardMinWidth;
+
+  &.vertical__left svg {
+    width: #{$squareWidth};
+  }
+  &.vertical__right svg {
+    width: #{$squareWidth};
+    margin-right: calc(#{$squareWidth} * 2) !important;
+  }
+  &.horizontal__top {
+    margin-top: -#{$squareWidth} !important;
+  }
+  &.horizontal__bottom {
+    margin-top: #{$squareWidth} !important;
+  }
+  &.diagonal {
+    svg {
+      width: 130%;
+      height: 130%;
+      margin: -15%;
     }
   }
+}
 
 #score, .game-info {
   height: calc((100vh - #{$boardWidth}) / 2);
@@ -68,12 +78,22 @@ $boardMinWidth: calc((#{$squareMinWidth} * 3) + (1px * 4));
   }
 }
 
-
-
 /* Desktop */
 @media screen and (min-aspect-ratio: 300/400) and (min-height: 750px) {
-    #score, .game-info {
-      height: calc((100vh - #{$boardMaxWidth}) / 2); }
+  #score, .game-info {
+    height: calc((100vh - #{$boardMaxWidth}) / 2);
+  }
+
+  @media screen and (min-height: 770px) {
+    .overlay {
+      &.horizontal__top {
+        margin-top: -#{$squareMaxWidth} !important;
+      }
+      &.horizontal__bottom {
+        margin-top: #{$squareMaxWidth} !important;
+      }
+    }
+  }
 }
 
 /* mobile */
@@ -83,10 +103,12 @@ $boardMinWidth: calc((#{$squareMinWidth} * 3) + (1px * 4));
 
   .square move {
     height: calc(#{$squareWidth} - 1em);
-    width: calc(#{$squareWidth} - 1em); }
+    width: calc(#{$squareWidth} - 1em);
+  }
 
   .board-row {
-    width: $boardWidth; }
+    width: $boardWidth;
+  }
 
   .overlay {
     width: $boardWidth;
@@ -96,12 +118,16 @@ $boardMinWidth: calc((#{$squareMinWidth} * 3) + (1px * 4));
     min-width: $boardMinWidth;
     min-height: $boardMinWidth;
 
-    &.vertical__left svg { width: #{$squareWidth}; }
-    &.vertical__right svg { width: #{$squareWidth}; margin-right: calc(#{$squareWidth} * 2) !important;}
+    &.vertical__left svg {
+      width: #{$squareWidth};
+    }
+    &.vertical__right svg {
+      width: #{$squareWidth};
+      margin-right: calc(#{$squareWidth} * 2) !important;
+    }
 
-
-    &.horizontal__top     { margin-top: -#{$squareWidth} !important; }
-    &.horizontal__bottom  { margin-top: #{$squareWidth} !important; }
+    &.horizontal__top {   margin-top: -#{$squareWidth} !important;   }
+    &.horizontal__bottom {   margin-top: #{$squareWidth} !important;   }
 
     &.diagonal {
       svg {
@@ -113,11 +139,23 @@ $boardMinWidth: calc((#{$squareMinWidth} * 3) + (1px * 4));
   }
 
   #score, .game-info {
-    height: calc((100vh - #{$boardWidth}) / 2); }
+    height: calc((100vh - #{$boardWidth}) / 2);
+  }
 
-    @media screen and (min-width: 450px) {
-        #score, .game-info {
-          height: calc((100vh - #{$boardMaxWidth}) / 2); }
-
+  @media screen and (min-width: 450px) {
+    #score, .game-info {
+      height: calc((100vh - #{$boardMaxWidth}) / 2);
     }
+  }
+}
+
+@media screen and (max-height: 300px) {
+  .game .overlay {
+    &.horizontal__top {
+      margin-top: -#{$squareMinWidth} !important;
+    }
+    &.horizontal__bottom {
+      margin-top: #{$squareMinWidth} !important;
+    }
+  }
 }

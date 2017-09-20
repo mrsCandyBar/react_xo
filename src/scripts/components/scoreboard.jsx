@@ -5,7 +5,7 @@ export default class Scoreboard extends React.Component {
     constructor() {
         super();
         this.state = {
-            game: {}
+            users: {}
         }
     }
 
@@ -32,7 +32,6 @@ export default class Scoreboard extends React.Component {
 
         return (
             <ul id="score">{ userList }</ul>
-
         );
     }
 }

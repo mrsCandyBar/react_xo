@@ -79,6 +79,19 @@ svg {
 .ico-blue { fill: $blue; color: $blue; }
 .ico-yellow { fill: $yellow; color: $yellow; }
 
+.angle-1 { transform: rotate(0deg); }
+.angle-2 { transform: rotate(5deg); }
+.angle-3 { transform: rotate(10deg); }
+.angle-4 { transform: rotate(13deg); }
+.angle-5 { transform: rotate(17deg); }
+.angle-6 { transform: rotate(22deg); }
+.angle-7 { transform: rotate(26deg); }
+.angle-8 { transform: rotate(30deg); }
+.angle-9 { transform: rotate(35deg); }
+.angle-10 { transform: rotate(40deg); }
+.angle-11 { transform: rotate(45deg); }
+.angle-12 { transform: rotate(50deg); }
+
 #score {
     text-align: center;
     margin: 0 auto;
